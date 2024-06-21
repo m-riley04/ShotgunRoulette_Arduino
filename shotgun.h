@@ -6,7 +6,8 @@
 
 enum Shell {
     BLANK,
-    LIVE
+    LIVE,
+    ERROR = -1
 };
 
 class Shotgun {
@@ -14,12 +15,14 @@ public:
     Shotgun();
 
     void load(int shells);
-    void fire();
-    void rack();
+    int fire();
+    int rack();
     void empty();
     Shell peek();
     String reveal();
     int getTotalShells();
+    int getLiveShells();
+    int getBlankShells();
 
     void setIsSawedOff(bool sawedOff);
     bool getIsSawedOff();
