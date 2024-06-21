@@ -17,12 +17,15 @@ public:
     int getId();
     int getLives();
     void setLives(int lives);
+    int getScore();
+    void setScore(int score);
 
     bool operator==(const Player &other) const;
 
 private:
     int id;
     int lives;
+    int score;
     List<Item> items;
 };
 

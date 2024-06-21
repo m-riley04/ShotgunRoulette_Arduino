@@ -43,6 +43,14 @@ void Player::setLives(int lives) {
     this->lives = lives;
 }
 
+int Player::getScore() {
+  return this->score;
+}
+
+void Player::setScore(int score) {
+  this->score = score;
+}
+
 bool Player::operator==(const Player &other) const {
   return this->id == other.id;
 }
