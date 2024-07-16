@@ -15,18 +15,18 @@ void Shotgun::load(int shells) {
     int median = shells / 2;
     for (int i = 0; i < shells; i++) {
         Shell isLive;
-        // Ensure there are no 0-shells
-        if (this->shellsBlank >= median-1) {
-          isLive = LIVE;
-          this->magazine.push(&isLive);
-          this->shellsLive++;
-          continue;
-        } else if (this->shellsLive >= median-1) {
-          isLive = BLANK;
-          this->magazine.push(&isLive);
-          this->shellsBlank++;
-          continue;
-        }
+        // Ensure there are more evenly distributed shells
+        // if (this->shellsBlank >= median) {
+        //   isLive = LIVE;
+        //   this->magazine.push(&isLive);
+        //   this->shellsLive++;
+        //   continue;
+        // } else if (this->shellsLive >= median) {
+        //   isLive = BLANK;
+        //   this->magazine.push(&isLive);
+        //   this->shellsBlank++;
+        //   continue;
+        // }
 
         // Randomly set round state
         isLive = (Shell)random(0, 2); // random(0, 2) to get 0 or 1
@@ -36,6 +36,14 @@ void Shotgun::load(int shells) {
         if (isLive == LIVE) this->shellsLive++;
         else this->shellsBlank++;
     }
+
+    // Log
+    Serial.print(shells);
+    Serial.print(" SHELLS: ");
+    Serial.print(this->shellsLive);
+    Serial.print(" LIVE, ");
+    Serial.print(this->shellsBlank);
+    Serial.println(" BLANK.");
 }
 
 int Shotgun::fire() {
@@ -97,6 +105,10 @@ String Shotgun::reveal() {
     }
 
     return _string;
+}
+
+bool Shotgun::isEmpty() {
+  return this->magazine.isEmpty();
 }
 
 int Shotgun::getTotalShells() {

@@ -20,6 +20,7 @@ public:
     void empty();
     Shell peek();
     String reveal();
+    bool isEmpty();
     int getTotalShells();
     int getLiveShells();
     int getBlankShells();

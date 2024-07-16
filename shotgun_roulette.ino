@@ -29,15 +29,15 @@ class Game {
         // Initialize the round
         switch (round) {
           case (1):
-            Serial.println("ROUND 1");
+            Serial.println("-ROUND 1-");
             this->initialize_round(2, 0, 4);
             break;
           case (2):
-            Serial.println("ROUND 2");
+            Serial.println("-ROUND 2-");
             this->initialize_round(4, 2, 5);
             break;
           case (3):
-            Serial.println("ROUND 3");
+            Serial.println("-ROUND 3-");
             this->initialize_round(5, 4, 8);
             break;
           default:
@@ -51,6 +51,8 @@ class Game {
         Player &wielder = this->p1;
         Player &target = this->p2;
         bool handcuffsOn = false;
+        digitalWrite(PIN_PLAYER_1, HIGH);
+        digitalWrite(PIN_PLAYER_2, LOW);
         while (this->p1.getLives() > 0 && this->p2.getLives() > 0) {
           // TODO: Check for items/interactions
 
@@ -58,37 +60,32 @@ class Game {
 
           // Check for trigger pull
           if (digitalRead(PIN_TRIGGER) == HIGH && isReady) {
-            Serial.print("Target: ");
-            Serial.print(target.getId());
-            Serial.print("\t Wielder: ");
-            Serial.println(wielder.getId());
+            Serial.print("== Player ");
+            Serial.print(wielder.getId());
+            Serial.println("'s turn ==");
+            Serial.print("Target: Player ");
+            Serial.println(target.getId());
+            
+            // Check for errors
+            if (this->shotgun.isEmpty()) {
+              Serial.println("ERROR: The shotgun is empty.");
+              continue;
+            }
 
             isReady = false;
             isLive = this->shotgun.peek();
-            
-            int fireError = this->shotgun.fire(); // Fire the shotgun
-            if (fireError == -1) {
-              Serial.println("ERROR: Cannot fire, the shotgun is empty.");
-              continue;
-            }
-
-            if (isLive == -1) {
-              Serial.println("ERROR: Cannot peek, the shotgun is empty.");
-              continue;
-            }
+            this->shotgun.fire();
 
             // Deal damage
             int damage = (int)isLive + (1*shotgun.getIsSawedOff());
             if (wielder == target) wielder.setLives(wielder.getLives()-damage);
             else target.setLives(target.getLives()-damage);
 
-            // TODO: Check the lives of each player
-
             // TODO: Check for any item interactions
 
             // Check whether to give wielder another turn
-            if (!handcuffsOn || !(isLive && target == wielder)) {
-
+            if (handcuffsOn || (isLive && target == wielder)) Serial.println("Giving the wielder another turn.");
+            else {
               // Switch the wielder
               if (!isRedTurn) {
                 wielder = this->p2;
@@ -106,24 +103,30 @@ class Game {
               }
 
               isRedTurn = !isRedTurn;
-            } else {
-              Serial.println("Giving the wielder another turn.");
+              Serial.println("");
             }
 
             // Log
-            Serial.print("Player 1: ");
+            Serial.print("Player Red: ");
             Serial.print(this->p1.getLives());
-            Serial.print("\t Player 2: ");
+            Serial.print("  Player Blue: ");
             Serial.println(this->p2.getLives());
             Serial.print("Shells Left: ");
             Serial.println(this->shotgun.getTotalShells());
 
-            Serial.print("== Player ");
+            Serial.print("It is now Player ");
             Serial.print(wielder.getId());
-            Serial.println("'s turn ==");
+            Serial.println("'s turn.");
 
-          } else if (digitalRead(PIN_TRIGGER) == LOW) {
+          }
+          
+          if (digitalRead(PIN_TRIGGER) == LOW) {
             isReady = true;
+          }
+
+          // Check if the shotgun needs to be reloaded
+          if (shotgun.isEmpty()) {
+            shotgun.load(6);
           }
         }
       }
@@ -138,17 +141,10 @@ class Game {
       // Give items
       p1.addRandomItems(items);
       p2.addRandomItems(items);
+      Serial.println("ITEMS GIVEN.");
 
       // Load the shotgun
       shotgun.load(shells);
-
-      // Log
-      Serial.print(shells);
-      Serial.print(" SHELLS: ");
-      Serial.print(shotgun.getLiveShells());
-      Serial.print(" LIVE, ");
-      Serial.print(shotgun.getBlankShells());
-      Serial.println(" BLANK.");
     }
 
   private:
